@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="GLMCv1" default="" basedir=".">
+    <description>GLMC build file</description>
+  <property name="src" location="src" />
+  <property name="build" location="bin" />
+  <property name="dist"  location="dist" />
+ 
+	 <property name="pluginsDir"  location="$basedir/../../imagej/plugins/" />
+	 <property name="FIJIpluginsDir"  location= "D:\\Fiji.app\\plugins\\" />
+	 	
+  <property name="user.name" value="Kota Miura" ></property>
+<target name="main" depends="compress" description="Main target">
+	<echo>
+		Building the .jar file.
+	</echo>
+</target>
+ <target name="compress" depends="" description="generate the distribution">
+ 	<jar jarfile="GLMC_Texture3.jar">
+ 		<fileset dir="." includes="plugins.config" />
+		<fileset dir="${build}" includes="**/*.*" ></fileset>
+ 		<manifest>
+ 		 	 	      <attribute name="Built-By" value="${user.name}"/>
+ 		</manifest>
+ 	</jar>
+    <copy file="GLMC_Texture3.jar" toDir="${pluginsDir}" />
+    <copy file="GLMC_Texture3.jar" toDir="${FIJIpluginsDir}" />	
+  </target>
+</project>
