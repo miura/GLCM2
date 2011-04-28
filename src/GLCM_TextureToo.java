@@ -38,7 +38,7 @@
 
 /* Modified by Kota Miura (miura@embl.de)
  * setters, getters
- * 
+ * created several method to outsource. 
  * 
  */
 
