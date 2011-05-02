@@ -1,7 +1,11 @@
 package emblcmci.glmc;
 
+import java.awt.Rectangle;
+
+import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.measure.ResultsTable;
+import ij.process.ImageProcessor;
 
 public class GLMCtexture {
 	static int d = 1;
@@ -39,7 +43,24 @@ public class GLMCtexture {
 	public double Inertia;
 	public double Correlation;
 	public double GLCMsum;
+
+	/**Constructor for use as library
+	 * all the parameters will be by default be measured (true). 
+	 * @param d
+	 * @param phi
+	 * @param symmetry
+	 */
+	@SuppressWarnings("static-access")
+	public GLMCtexture(int d, int phi, boolean  symmetry){
+		this.d = d;
+		this.phi = phi;
+		this.symmetry = symmetry;
+	}
 	
+	public GLMCtexture() {
+		// TODO Auto-generated constructor stub
+	}
+
 	public static void setD(int d) {
 		GLMCtexture.d = d;
 	}
@@ -354,5 +375,138 @@ if (doMoments == true){
 		doShade=gd.getNextBoolean();
 
 		return true;
-	}	
+	}
+	
+	/**main part that does the calculation of GLMC
+	 * 
+	 * @param ip
+	 */
+	public double [][] calcGLMC(ImageProcessor ip){
+		// use the bounding rectangle ROI to roughly limit processing
+		Rectangle roi = ip.getRoi();
+
+		// get byte arrays for the image pixels and mask pixels
+		int width = ip.getWidth();
+		int height = ip.getHeight();
+		byte [] pixels = (byte []) ip.getPixels();
+		byte [] mask = ip.getMaskArray();
+
+		// value = value at pixel of interest; dValue = value of pixel at offset    
+		int value;
+		int dValue;
+		double totalPixels = roi.height * roi.width;
+		if (symmetry) totalPixels = totalPixels * 2; 
+		double pixelProgress = 0;
+		double pixelCount = 0;
+
+		//====================================================================================================
+		// compute the Gray Level Correlation Matrix
+
+		int offsetX = 1;
+		int offsetY = 0;
+		glcm = new double [256][256];
+
+		// set our offsets based on the selected angle
+//		if (phi == 0) {
+//			offsetX = d;
+//			offsetY = 0;
+//		} else if (phi == 45) {
+//			offsetX = d;
+//			offsetY = -d;
+//		} else if (phi == 90) {
+//			offsetX = 0;
+//			offsetY = -d;
+//		} else if (phi == 135) {
+//			offsetX = -d;
+//			offsetY = -d;
+//		} else {
+//			// the angle is not one of the options
+//			IJ.showMessage("The requested angle,"+phi+", is not one of the supported angles (0,45,90,135)");
+//		}
+		double rad = Math.toRadians(-1.0 * phi);
+		offsetX = (int) ((int) d* Math.round(Math.cos(rad)));
+		offsetY = (int) ((int) d* Math.round(Math.sin(rad)));
+		
+
+		// loop through the pixels in the ROI bounding rectangle
+		for (int y=roi.y; y<(roi.y + roi.height); y++) 	{
+			for (int x=roi.x; x<(roi.x + roi.width); x++)	 {
+				// check to see if the pixel is in the mask (if it exists)
+				if ((mask == null) || ((0xff & mask[(((y-roi.y)*roi.width)+(x-roi.x))]) > 0) ) {
+					// check to see if the offset pixel is in the roi
+					int dx = x + offsetX;
+					int dy = y + offsetY;
+					if ( ((dx >= roi.x) && (dx < (roi.x+roi.width))) && ((dy >= roi.y) && (dy < (roi.y+roi.height))) ) {
+						// check to see if the offset pixel is in the mask (if it exists) 
+						if ((mask == null) || ((0xff & mask[(((dy-roi.y)*roi.width)+(dx-roi.x))]) > 0) ) {
+							value = 0xff & pixels[(y*width)+x];
+							dValue = 0xff & pixels[(dy*width) + dx];
+							glcm [value][dValue]++;		  			
+							pixelCount++;
+						}
+						// if symmetry is selected, invert the offsets and go through the process again
+						if (symmetry) {
+							dx = x - offsetX;
+							dy = y - offsetY;
+							if ( ((dx >= roi.x) && (dx < (roi.x+roi.width))) && ((dy >= roi.y) && (dy < (roi.y+roi.height))) ) {
+								// check to see if the offset pixel is in the mask (if it exists) 
+								if ((mask == null) || ((0xff & mask[(((dy-roi.y)*roi.width)+(dx-roi.x))]) > 0) ) {
+									value = 0xff & pixels[(y*width)+x];
+									dValue = 0xff & pixels[(dy*width) + dx];
+									glcm [dValue][value]++;		  			
+									pixelCount++;
+								}	
+							}
+						}
+					}  
+				}
+				pixelProgress++;	
+				IJ.showProgress(pixelProgress/totalPixels);
+			}
+		}
+
+		// convert the GLCM from absolute counts to probabilities
+		for (int i=0; i<256; i++)  {
+			for (int j=0; j<256; j++) {
+				glcm[i][j] = (glcm[i][j])/(pixelCount);
+			}
+		}
+		return glcm;
+	}
+	
+	public void writetoResultsTable(GLMCtexture gl, boolean rt_reset){
+		ResultsTable rt = ResultsTable.getResultsTable();
+		if (rt_reset) rt.reset();
+		gl.doBasicStats();
+		gl.setFieldParameters();
+		int row = rt.getCounter();	
+		rt.incrementCounter();
+		if (doASM)			
+			rt.setValue("Angular Second Moment", row, gl.getAngular2ndMoment());
+		if (doIDM)
+			rt.setValue("Inverse Difference Moment", row, gl.getIDM());
+		if (doContrast)
+			rt.setValue("Contrast", row, gl.getContrast());	
+		if (doEnergy)
+			rt.setValue("Energy", row, gl.getEnergy());
+		if (doEntropy)
+			rt.setValue("Entropy", row, gl.getEntropy());
+		if (doHomogeneity)
+			rt.setValue("Homogeneity", row, gl.getHomogeneity());		
+		if (doVariance)
+			rt.setValue("Variance", row, gl.getVariance());
+		if (doShade)
+			rt.setValue("Shade", row, gl.getShade());
+		if (doProminence)
+			rt.setValue("Prominence", row, gl.getProminence()); 
+		if (doInertia)
+			rt.setValue("Inertia", row, gl.getInertia());
+		if (doCorrelation)
+			rt.setValue("Correlation", row, gl.getCorrelation()); 
+		
+		rt.setValue("Sum of all GLCM elements", row, gl.getGLCMsum());
+		rt.show("Results");		
+	}
+	
+
 }
