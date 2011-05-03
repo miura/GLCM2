@@ -62,6 +62,7 @@ public class GLCM_TextureToo implements PlugInFilter {
 		//calculates GLMC
 		gl.calcGLMC(ip);
 		// show results in the Results Table
-		gl.writetoResultsTable(gl, true);
+		gl.setRt_reset(true);
+		gl.writetoResultsTable(gl);
 	}
 }

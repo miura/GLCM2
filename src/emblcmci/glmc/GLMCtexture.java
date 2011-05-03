@@ -1,8 +1,28 @@
 package emblcmci.glmc;
+/** Kota Miura miura@embl.de
+ * 		most of the parts copied from GLCM_TextToo.java written by Toby C. Cornish @jhmi.edu
+ * 		see GLCM_TextToo.java header part for details. 
+ * 	for use from scripts and other class as stand alone:
+ * 		use constructor GLMCtexture(int d, int phi, boolean  symmetry)
+ * 		use calcGLMC(ImagePlus imp) to set imageplus object and calculate GLMC
+ */
+
+/* sample javascript 
+
+importClass(Packages.emblcmci.glmc.GLMCtexture);
+g = new GLMCtexture(IJ.getImage(), 2, 45, true, true);
+glmc = g.calcGLMC();
+ht = g.getResultsArray(g);
+IJ.log(ht.get("Contrast")) ;
+
+ */
 
 import java.awt.Rectangle;
+import java.util.HashMap;
+import java.util.Map;
 
 import ij.IJ;
+import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.measure.ResultsTable;
 import ij.process.ImageProcessor;
@@ -22,6 +42,9 @@ public class GLMCtexture {
 	static boolean doProminence = true;
 	static boolean doVariance = true;
 	static boolean doShade = true;
+	
+	boolean rt_reset = true;
+
 
 	ResultsTable rt = ResultsTable.getResultsTable();
 
@@ -43,6 +66,8 @@ public class GLMCtexture {
 	public double Inertia;
 	public double Correlation;
 	public double GLCMsum;
+	
+	ImagePlus imp;
 
 	/**Constructor for use as library
 	 * all the parameters will be by default be measured (true). 
@@ -51,10 +76,20 @@ public class GLMCtexture {
 	 * @param symmetry
 	 */
 	@SuppressWarnings("static-access")
-	public GLMCtexture(int d, int phi, boolean  symmetry){
+	public GLMCtexture(int d, int phi, boolean  symmetry, boolean rt_reset){
 		this.d = d;
 		this.phi = phi;
 		this.symmetry = symmetry;
+		this.rt_reset = rt_reset;
+	}
+	
+	@SuppressWarnings("static-access")
+	public GLMCtexture(ImagePlus imp, int d, int phi, boolean  symmetry, boolean rt_reset){
+		this.imp = imp;
+		this.d = d;
+		this.phi = phi;
+		this.symmetry = symmetry;
+		this.rt_reset = rt_reset;
 	}
 	
 	public GLMCtexture() {
@@ -69,6 +104,10 @@ public class GLMCtexture {
 		GLMCtexture.phi = phi;
 	}	
 
+	public void setRt_reset(boolean rtReset) {
+		rt_reset = rtReset;
+	}
+	
 	public void doBasicStats(){
 		double [] px = new double [256];
 		double [] py = new double [256];
@@ -376,6 +415,16 @@ if (doMoments == true){
 
 		return true;
 	}
+
+	public double [][] calcGLMC(){
+		if (imp == null)
+			imp = IJ.getImage();
+		return calcGLMC(imp);
+	}
+	
+	public double [][] calcGLMC(ImagePlus imp){
+		return calcGLMC(imp.getProcessor());
+	}
 	
 	/**main part that does the calculation of GLMC
 	 * 
@@ -474,9 +523,9 @@ if (doMoments == true){
 		return glcm;
 	}
 	
-	public void writetoResultsTable(GLMCtexture gl, boolean rt_reset){
+	public void writetoResultsTable(GLMCtexture gl){
 		ResultsTable rt = ResultsTable.getResultsTable();
-		if (rt_reset) rt.reset();
+		if (this.rt_reset) rt.reset();
 		gl.doBasicStats();
 		gl.setFieldParameters();
 		int row = rt.getCounter();	
@@ -506,6 +555,22 @@ if (doMoments == true){
 		
 		rt.setValue("Sum of all GLCM elements", row, gl.getGLCMsum());
 		rt.show("Results");		
+	}
+	
+	public HashMap<?, ?> getResultsArray(GLMCtexture gl){
+		HashMap<String, Double> res = new HashMap<String, Double>();
+		res.put("Angular Second Moment", gl.getAngular2ndMoment());
+		res.put("Inverse Difference Moment", gl.getIDM());
+		res.put("Contrast", gl.getContrast());
+		res.put("Energy", gl.getEnergy());
+		res.put("Homogeneity", gl.getHomogeneity());
+		res.put("Variance", gl.getVariance());
+		res.put("Shade", gl.getShade());
+		res.put("Prominence", gl.getProminence());
+		res.put("Inertia", gl.getInertia());
+		res.put("Correlation", gl.getCorrelation());
+		res.put("Sum of all GLCM elements", gl.getGLCMsum());
+		return res;
 	}
 	
 
