@@ -54,15 +54,11 @@ public class GLCM_TextureToo implements PlugInFilter {
 	
 	public int setup(String arg, ImagePlus imp) {
 		if (imp!=null && !gl.showDialog()) return DONE;
-		//perhaps not reseting the resultsTable would be better... ??
 		return DOES_8G+DOES_STACKS+SUPPORTS_MASKING;
 	}
 
 	public void run(ImageProcessor ip) {
-		//calculates GLMC
 		gl.calcGLMC(ip);
-		// show results in the Results Table
-		gl.setRt_reset(true);
-		gl.writetoResultsTable(gl);
+		gl.writetoResultsTable();
 	}
 }

@@ -19,7 +19,6 @@ IJ.log(ht.get("Contrast")) ;
 
 import java.awt.Rectangle;
 import java.util.HashMap;
-import java.util.Map;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -43,7 +42,7 @@ public class GLMCtexture {
 	static boolean doVariance = true;
 	static boolean doShade = true;
 	
-	boolean rt_reset = true;
+	static boolean rt_reset = true;
 
 
 	ResultsTable rt = ResultsTable.getResultsTable();
@@ -75,6 +74,11 @@ public class GLMCtexture {
 	 * @param phi
 	 * @param symmetry
 	 */
+
+	public GLMCtexture(){
+	}
+
+	
 	@SuppressWarnings("static-access")
 	public GLMCtexture(int d, int phi, boolean  symmetry, boolean rt_reset){
 		this.d = d;
@@ -90,10 +94,6 @@ public class GLMCtexture {
 		this.phi = phi;
 		this.symmetry = symmetry;
 		this.rt_reset = rt_reset;
-	}
-	
-	public GLMCtexture() {
-		// TODO Auto-generated constructor stub
 	}
 
 	public static void setD(int d) {
@@ -282,8 +282,10 @@ if (doMoments == true){
 		return variance;		
 	}
 	
-	//===============================================================================================
-	// calculate the shade (Walker, et al., 1995; Connors, et al. 1984)
+	/** Shade
+	 * calculate the shade (Walker, et al., 1995; Connors, et al. 1984)
+	 * @return
+	 */
 	public double getShade(){
 		double shade = 0.0;
 
@@ -323,10 +325,10 @@ if (doMoments == true){
 		return inertia;
 	}
 	//=====================================================================================================
-	// calculate the correlation
-	// methods based on Haralick 1973 (and MatLab), Walker 1995 are included below
-	// Haralick/Matlab result reported for correlation currently; will give Walker as an option in the future
-
+	/** calculate the correlation
+	 *  methods based on Haralick 1973 (and MatLab), Walker 1995 are included below
+	 * Haralick/Matlab result reported for correlation currently; will give Walker as an option in the future
+	 */
 	public double getCorrelation(){
 		double correlation=0.0;
 
@@ -378,10 +380,11 @@ if (doMoments == true){
 	public boolean showDialog() {
 		GenericDialog gd = new GenericDialog("GLCM Texture v0.001");
 		gd.addNumericField ("Enter the size of the step in pixels",  d, 0);
-
 		String [] angles={"0", "45", "90", "135"};
 		gd.addChoice("Select the direction of the step", angles, Integer.toString(phi));
 		gd.addCheckbox("Symmetrical GLCM?", symmetry);
+		gd.addCheckbox("Reset Results Table?", rt_reset);
+
 		gd.addMessage("Calculate which parameters?");   
 		gd.addCheckbox("Angular Second Moment  ", doASM);
 		gd.addCheckbox("Contrast  ", doContrast);
@@ -400,7 +403,8 @@ if (doMoments == true){
 
 		d=(int) gd.getNextNumber();
 		phi=Integer.parseInt(gd.getNextChoice());
-		symmetry=gd.getNextBoolean();
+		symmetry = gd.getNextBoolean();
+		rt_reset = gd.getNextBoolean();
 		doASM=gd.getNextBoolean();
 		doContrast=gd.getNextBoolean();
 		doCorrelation=gd.getNextBoolean();
@@ -510,7 +514,7 @@ if (doMoments == true){
 					}  
 				}
 				pixelProgress++;	
-				IJ.showProgress(pixelProgress/totalPixels);
+				//IJ.showProgress(pixelProgress/totalPixels);
 			}
 		}
 
@@ -523,7 +527,8 @@ if (doMoments == true){
 		return glcm;
 	}
 	
-	public void writetoResultsTable(GLMCtexture gl){
+	public void writetoResultsTable(){
+		GLMCtexture gl = this;
 		ResultsTable rt = ResultsTable.getResultsTable();
 		if (this.rt_reset) rt.reset();
 		gl.doBasicStats();
@@ -557,7 +562,8 @@ if (doMoments == true){
 		rt.show("Results");		
 	}
 	
-	public HashMap<?, ?> getResultsArray(GLMCtexture gl){
+	public HashMap<?, ?> getResultsArray(){
+		GLMCtexture gl = this;
 		HashMap<String, Double> res = new HashMap<String, Double>();
 		res.put("Angular Second Moment", gl.getAngular2ndMoment());
 		res.put("Inverse Difference Moment", gl.getIDM());
