@@ -47,6 +47,8 @@ import ij.plugin.filter.PlugInFilter;
 import ij.process.*;
 import emblcmci.glmc.GLMCtexture;
 
+//TODO Enable Stack treatments (check if plugin filter does automatically) 
+
 //==========================================================
 public class GLCM_TextureToo implements PlugInFilter {
 	
