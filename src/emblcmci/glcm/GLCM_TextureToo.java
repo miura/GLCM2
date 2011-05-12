@@ -1,3 +1,5 @@
+package emblcmci.glcm;
+
 //=================================================================================================
 // GLCM_Texture_Too, v. 0.008
 // Toby C. Cornish, tcornis3@jhmi.edu (or toby@tobycornish.com)
@@ -40,19 +42,21 @@
  * 	added setters, getters
  * 	out-sourced  processes in run() to several methods. 
  * 	major part moved to a new class emblcmci.GLMC.GLMCtexture to enable library-like usage
+ *  
+ * 
  */
 
 import ij.*;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.*;
-import emblcmci.glmc.GLMCtexture;
+import emblcmci.glcm.GLCMtexture;
 
 //TODO Enable Stack treatments (check if plugin filter does automatically) 
 
 //==========================================================
 public class GLCM_TextureToo implements PlugInFilter {
 	
-	GLMCtexture gl = new GLMCtexture();
+	GLCMtexture gl = new GLCMtexture();
 	
 	public int setup(String arg, ImagePlus imp) {
 		if (imp!=null && !gl.showDialog()) return DONE;

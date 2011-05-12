@@ -1,4 +1,4 @@
-package emblcmci.glmc;
+package emblcmci.glcm;
 /** Kota Miura miura@embl.de
  * 		most of the parts copied from GLCM_TextToo.java written by Toby C. Cornish @jhmi.edu
  * 		see GLCM_TextToo.java header part for details. 
@@ -26,7 +26,7 @@ import ij.gui.GenericDialog;
 import ij.measure.ResultsTable;
 import ij.process.ImageProcessor;
 
-public class GLMCtexture {
+public class GLCMtexture {
 	static int d = 1;
 	static int phi = 0;
 	static boolean symmetry = true;
@@ -75,12 +75,12 @@ public class GLMCtexture {
 	 * @param symmetry
 	 */
 
-	public GLMCtexture(){
+	public GLCMtexture(){
 	}
 
 	
 	@SuppressWarnings("static-access")
-	public GLMCtexture(int d, int phi, boolean  symmetry, boolean rt_reset){
+	public GLCMtexture(int d, int phi, boolean  symmetry, boolean rt_reset){
 		this.d = d;
 		this.phi = phi;
 		this.symmetry = symmetry;
@@ -88,7 +88,7 @@ public class GLMCtexture {
 	}
 	
 	@SuppressWarnings("static-access")
-	public GLMCtexture(ImagePlus imp, int d, int phi, boolean  symmetry, boolean rt_reset){
+	public GLCMtexture(ImagePlus imp, int d, int phi, boolean  symmetry, boolean rt_reset){
 		this.imp = imp;
 		this.d = d;
 		this.phi = phi;
@@ -97,11 +97,11 @@ public class GLMCtexture {
 	}
 
 	public static void setD(int d) {
-		GLMCtexture.d = d;
+		GLCMtexture.d = d;
 	}
 
 	public static void setPhi(int phi) {
-		GLMCtexture.phi = phi;
+		GLCMtexture.phi = phi;
 	}	
 
 	public void setRt_reset(boolean rtReset) {
@@ -528,7 +528,7 @@ if (doMoments == true){
 	}
 	
 	public void writetoResultsTable(){
-		GLMCtexture gl = this;
+		GLCMtexture gl = this;
 		ResultsTable rt = ResultsTable.getResultsTable();
 		if (this.rt_reset) rt.reset();
 		gl.doBasicStats();
@@ -563,7 +563,7 @@ if (doMoments == true){
 	}
 	
 	public HashMap<?, ?> getResultsArray(){
-		GLMCtexture gl = this;
+		GLCMtexture gl = this;
 		HashMap<String, Double> res = new HashMap<String, Double>();
 		res.put("Angular Second Moment", gl.getAngular2ndMoment());
 		res.put("Inverse Difference Moment", gl.getIDM());
