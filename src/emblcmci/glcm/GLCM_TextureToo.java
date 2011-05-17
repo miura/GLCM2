@@ -38,12 +38,9 @@ package emblcmci.glcm;
 //   Image processing lab, Department of Informatics, University of Oslo. Xite v1.35: glcmParameter.c, v1.30
 //     2004/05/05 07:34:19 (2004)
 
-/* 5/2/2011 Modified by Kota Miura (miura@embl.de) 
- * 	added setters, getters
- * 	out-sourced  processes in run() to several methods. 
- * 	major part moved to a new class emblcmci.GLMC.GLMCtexture to enable library-like usage
- *  
- * 
+/* 5/17/2011 Modified by Kota Miura (miura@embl.de) 
+ * 	methods were moved to GLCMtexture.java
+ * 	this class now only implements imageJ plugin by using GLCMtexture class.   
  */
 
 import ij.*;

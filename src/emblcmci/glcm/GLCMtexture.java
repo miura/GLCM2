@@ -1,19 +1,22 @@
 package emblcmci.glcm;
-/** Kota Miura miura@embl.de
- * 		most of the parts copied from GLCM_TextToo.java written by Toby C. Cornish @jhmi.edu
- * 		see GLCM_TextToo.java header part for details. 
- * 	for use from scripts and other class as stand alone:
- * 		use constructor GLMCtexture(int d, int phi, boolean  symmetry)
- * 		use calcGLMC(ImagePlus imp) to set imageplus object and calculate GLMC
+/** GLCM Texture
+ * 		GLCM_TextToo.java written by Toby C. Cornish @jhmi.edu was modified for use of the methods as library. 
+ * 		see the header of GLCM_TextToo.java for details described in the original code. 
+ * 		for use from scripts and other class as stand alone:
+ * 			- added several constructors 
+ * 			- calcGLMC(ImagePlus imp) calculate GLMC
+ * 			- calculated Texture parameters could be extracted using getResultsArray()
+ * 			- added "reset Results table" check box in the dialog
+ * 			- for use from scripting languages, see example below. 
  */
 
-/* sample javascript 
+/* an example javascript 
 
 importClass(Packages.emblcmci.glmc.GLMCtexture);
 g = new GLMCtexture(IJ.getImage(), 2, 45, true, true);
 glmc = g.calcGLMC();
 ht = g.getResultsArray(g);
-IJ.log(ht.get("Contrast")) ;
+IJ.log(ht.get("Contrast"));
 
  */
 
@@ -41,7 +44,7 @@ public class GLCMtexture {
 	static boolean doProminence = true;
 	static boolean doVariance = true;
 	static boolean doShade = true;
-	
+
 	static boolean rt_reset = true;
 
 
@@ -65,25 +68,25 @@ public class GLCMtexture {
 	public double Inertia;
 	public double Correlation;
 	public double GLCMsum;
-	
+
 	ImagePlus imp;
 
 	public String[] paramA = 
 	{
-		"Angular Second Moment", 
-		"Inverse Difference Moment",
-		"Contrast",
-		"Energy",
-		"Entropy",
-		"Homogeneity",
-		"Variance",
-		"Shade",
-		"Prominence",
-		"Inertia",
-		"Correlation",
-		"Sum of all GLCM elements"
+			"Angular Second Moment", 
+			"Inverse Difference Moment",
+			"Contrast",
+			"Energy",
+			"Entropy",
+			"Homogeneity",
+			"Variance",
+			"Shade",
+			"Prominence",
+			"Inertia",
+			"Correlation",
+			"Sum of all GLCM elements"
 	};
-	
+
 	/**Constructor for use as library
 	 * all the parameters will be by default be measured (true). 
 	 * @param d
@@ -94,7 +97,7 @@ public class GLCMtexture {
 	public GLCMtexture(){
 	}
 
-	
+
 	@SuppressWarnings("static-access")
 	public GLCMtexture(int d, int phi, boolean  symmetry, boolean rt_reset){
 		this.d = d;
@@ -102,7 +105,7 @@ public class GLCMtexture {
 		this.symmetry = symmetry;
 		this.rt_reset = rt_reset;
 	}
-	
+
 	@SuppressWarnings("static-access")
 	public GLCMtexture(ImagePlus imp, int d, int phi, boolean  symmetry, boolean rt_reset){
 		this.imp = imp;
@@ -123,11 +126,11 @@ public class GLCMtexture {
 	public void setRt_reset(boolean rtReset) {
 		rt_reset = rtReset;
 	}
-	
+
 	public void setglcm(double[][] glcm){
 		this.glcm = glcm; 
 	}
-	
+
 	public void doBasicStats(){
 		double [] px = new double [256];
 		double [] py = new double [256];
@@ -169,7 +172,7 @@ public class GLCMtexture {
 			stdevy += ((Math.pow((i-meany),2))*py[i]);
 		}
 	}
-		
+
 	//=====================================================================================================
 	// This is the generic moments function from parker -- may implement in the future
 	// k is the power for the moment
@@ -202,7 +205,7 @@ if (doMoments == true){
 
 	//=====================================================================================================
 	// calculate the angular second moment (asm)
-	
+
 	public double getAngular2ndMoment(){
 		double asm = 0.0;
 		for (int i=0;  i<256; i++)  {
@@ -224,7 +227,7 @@ if (doMoments == true){
 	}
 	//=====================================================================================================
 	// calculate the angular second moment (asm)
-	
+
 	public double getContrast(){
 		double contrast=0.0;
 
@@ -266,7 +269,7 @@ if (doMoments == true){
 	// calculate the homogeneity (Parker)
 	// "Local Homogeneity" from Conners, et al., 1984 is calculated the same as IDM above
 	// Parker's implementation is below; absolute value of i-j is taken rather than square
-	
+
 	public double getHomogeneity(){
 		double homogeneity = 0.0;
 		for (int i=0;  i<256; i++) {
@@ -301,7 +304,7 @@ if (doMoments == true){
 		}
 		return variance;		
 	}
-	
+
 	/** Shade
 	 * calculate the shade (Walker, et al., 1995; Connors, et al. 1984)
 	 * @return
@@ -330,7 +333,7 @@ if (doMoments == true){
 		}
 		return prominence;
 	}
-	
+
 	//===============================================================================================
 	// calculate the inertia (Walker, et al., 1995; Connors, et al. 1984)	
 	public double getInertia(){
@@ -395,7 +398,7 @@ if (doMoments == true){
 		this.Correlation = getCorrelation();
 		this.GLCMsum = getGLCMsum();		
 	}
-	
+
 	// implementation of the dialog
 	public boolean showDialog() {
 		GenericDialog gd = new GenericDialog("GLCM Texture v0.001");
@@ -445,11 +448,11 @@ if (doMoments == true){
 			imp = IJ.getImage();
 		return calcGLMC(imp);
 	}
-	
+
 	public double [][] calcGLMC(ImagePlus imp){
 		return calcGLMC(imp.getProcessor());
 	}
-	
+
 	/**main part that does the calculation of GLMC
 	 * 
 	 * @param ip
@@ -480,26 +483,26 @@ if (doMoments == true){
 		glcm = new double [256][256];
 
 		// set our offsets based on the selected angle
-//		if (phi == 0) {
-//			offsetX = d;
-//			offsetY = 0;
-//		} else if (phi == 45) {
-//			offsetX = d;
-//			offsetY = -d;
-//		} else if (phi == 90) {
-//			offsetX = 0;
-//			offsetY = -d;
-//		} else if (phi == 135) {
-//			offsetX = -d;
-//			offsetY = -d;
-//		} else {
-//			// the angle is not one of the options
-//			IJ.showMessage("The requested angle,"+phi+", is not one of the supported angles (0,45,90,135)");
-//		}
+		//		if (phi == 0) {
+		//			offsetX = d;
+		//			offsetY = 0;
+		//		} else if (phi == 45) {
+		//			offsetX = d;
+		//			offsetY = -d;
+		//		} else if (phi == 90) {
+		//			offsetX = 0;
+		//			offsetY = -d;
+		//		} else if (phi == 135) {
+		//			offsetX = -d;
+		//			offsetY = -d;
+		//		} else {
+		//			// the angle is not one of the options
+		//			IJ.showMessage("The requested angle,"+phi+", is not one of the supported angles (0,45,90,135)");
+		//		}
 		double rad = Math.toRadians(-1.0 * phi);
 		offsetX = (int) ((int) d* Math.round(Math.cos(rad)));
 		offsetY = (int) ((int) d* Math.round(Math.sin(rad)));
-		
+
 
 		// loop through the pixels in the ROI bounding rectangle
 		for (int y=roi.y; y<(roi.y + roi.height); y++) 	{
@@ -546,7 +549,7 @@ if (doMoments == true){
 		}
 		return glcm;
 	}
-	
+
 	public void writetoResultsTable(boolean ShowResults){
 		GLCMtexture gl = this;
 		ResultsTable rt = ResultsTable.getResultsTable();
@@ -556,53 +559,33 @@ if (doMoments == true){
 		int row = rt.getCounter();	
 		rt.incrementCounter();
 		if (doASM)			
-			rt.setValue("Angular Second Moment", row, gl.getAngular2ndMoment());
+			rt.setValue("Angular Second Moment", row, gl.Asm);
 		if (doIDM)
-			rt.setValue("Inverse Difference Moment", row, gl.getIDM());
+			rt.setValue("Inverse Difference Moment", row, gl.Idm);
 		if (doContrast)
-			rt.setValue("Contrast", row, gl.getContrast());	
+			rt.setValue("Contrast", row, gl.Contrast);	
 		if (doEnergy)
-			rt.setValue("Energy", row, gl.getEnergy());
+			rt.setValue("Energy", row, gl.Energy);
 		if (doEntropy)
-			rt.setValue("Entropy", row, gl.getEntropy());
+			rt.setValue("Entropy", row, gl.Entropy);
 		if (doHomogeneity)
-			rt.setValue("Homogeneity", row, gl.getHomogeneity());		
+			rt.setValue("Homogeneity", row, gl.Homogeneity);		
 		if (doVariance)
-			rt.setValue("Variance", row, gl.getVariance());
+			rt.setValue("Variance", row, gl.Variance);
 		if (doShade)
-			rt.setValue("Shade", row, gl.getShade());
+			rt.setValue("Shade", row, gl.Shade);
 		if (doProminence)
-			rt.setValue("Prominence", row, gl.getProminence()); 
+			rt.setValue("Prominence", row, gl.Prominence); 
 		if (doInertia)
-			rt.setValue("Inertia", row, gl.getInertia());
+			rt.setValue("Inertia", row, gl.Inertia);
 		if (doCorrelation)
-			rt.setValue("Correlation", row, gl.getCorrelation()); 
-		
-		rt.setValue("Sum of all GLCM elements", row, gl.getGLCMsum());
+			rt.setValue("Correlation", row, gl.Correlation); 
+
+		rt.setValue("Sum of all GLCM elements", row, gl.GLCMsum);
 		if (ShowResults) rt.show("Results");		
 	} 
-	
 
-	
-	
-/*	public HashMap<?, ?> getResultsArray(){
-		GLCMtexture gl = this;
-		HashMap<String, Double> res = new HashMap<String, Double>();
-		res.put(paramA[0], gl.getAngular2ndMoment());
-		res.put(paramA[1], gl.getIDM());
-		res.put(paramA[2], gl.getContrast());
-		res.put(paramA[3], gl.getEnergy());
-		res.put(paramA[4], gl.getEntropy());
-		res.put(paramA[5], gl.getHomogeneity());
-		res.put(paramA[6], gl.getVariance());
-		res.put(paramA[7], gl.getShade());
-		res.put(paramA[8], gl.getProminence());
-		res.put(paramA[9], gl.getInertia());
-		res.put(paramA[10], gl.getCorrelation());
-		res.put(paramA[11], gl.getGLCMsum());
-		return res;
-	}
-*/
+
 	public HashMap<?, ?> getResultsArray(){
 		GLCMtexture gl = this;
 		gl.doBasicStats();
