@@ -68,6 +68,22 @@ public class GLCMtexture {
 	
 	ImagePlus imp;
 
+	public String[] paramA = 
+	{
+		"Angular Second Moment", 
+		"Inverse Difference Moment",
+		"Contrast",
+		"Energy",
+		"Entropy",
+		"Homogeneity",
+		"Variance",
+		"Shade",
+		"Prominence",
+		"Inertia",
+		"Correlation",
+		"Sum of all GLCM elements"
+	};
+	
 	/**Constructor for use as library
 	 * all the parameters will be by default be measured (true). 
 	 * @param d
@@ -106,6 +122,10 @@ public class GLCMtexture {
 
 	public void setRt_reset(boolean rtReset) {
 		rt_reset = rtReset;
+	}
+	
+	public void setglcm(double[][] glcm){
+		this.glcm = glcm; 
 	}
 	
 	public void doBasicStats(){
@@ -527,7 +547,7 @@ if (doMoments == true){
 		return glcm;
 	}
 	
-	public void writetoResultsTable(){
+	public void writetoResultsTable(boolean ShowResults){
 		GLCMtexture gl = this;
 		ResultsTable rt = ResultsTable.getResultsTable();
 		if (this.rt_reset) rt.reset();
@@ -559,25 +579,48 @@ if (doMoments == true){
 			rt.setValue("Correlation", row, gl.getCorrelation()); 
 		
 		rt.setValue("Sum of all GLCM elements", row, gl.getGLCMsum());
-		rt.show("Results");		
-	}
+		if (ShowResults) rt.show("Results");		
+	} 
 	
-	public HashMap<?, ?> getResultsArray(){
+
+	
+	
+/*	public HashMap<?, ?> getResultsArray(){
 		GLCMtexture gl = this;
 		HashMap<String, Double> res = new HashMap<String, Double>();
-		res.put("Angular Second Moment", gl.getAngular2ndMoment());
-		res.put("Inverse Difference Moment", gl.getIDM());
-		res.put("Contrast", gl.getContrast());
-		res.put("Energy", gl.getEnergy());
-		res.put("Homogeneity", gl.getHomogeneity());
-		res.put("Variance", gl.getVariance());
-		res.put("Shade", gl.getShade());
-		res.put("Prominence", gl.getProminence());
-		res.put("Inertia", gl.getInertia());
-		res.put("Correlation", gl.getCorrelation());
-		res.put("Sum of all GLCM elements", gl.getGLCMsum());
+		res.put(paramA[0], gl.getAngular2ndMoment());
+		res.put(paramA[1], gl.getIDM());
+		res.put(paramA[2], gl.getContrast());
+		res.put(paramA[3], gl.getEnergy());
+		res.put(paramA[4], gl.getEntropy());
+		res.put(paramA[5], gl.getHomogeneity());
+		res.put(paramA[6], gl.getVariance());
+		res.put(paramA[7], gl.getShade());
+		res.put(paramA[8], gl.getProminence());
+		res.put(paramA[9], gl.getInertia());
+		res.put(paramA[10], gl.getCorrelation());
+		res.put(paramA[11], gl.getGLCMsum());
 		return res;
 	}
-	
+*/
+	public HashMap<?, ?> getResultsArray(){
+		GLCMtexture gl = this;
+		gl.doBasicStats();
+		gl.setFieldParameters();
+		HashMap<String, Double> res = new HashMap<String, Double>();
+		res.put(paramA[0], gl.Asm);
+		res.put(paramA[1], gl.Idm);
+		res.put(paramA[2], gl.Contrast);
+		res.put(paramA[3], gl.Energy);
+		res.put(paramA[4], gl.Entropy);
+		res.put(paramA[5], gl.Homogeneity);
+		res.put(paramA[6], gl.Variance);
+		res.put(paramA[7], gl.Shade);
+		res.put(paramA[8], gl.Prominence);
+		res.put(paramA[9], gl.Inertia);
+		res.put(paramA[10], gl.Correlation);
+		res.put(paramA[11], gl.GLCMsum);
+		return res;
+	}	
 
 }
