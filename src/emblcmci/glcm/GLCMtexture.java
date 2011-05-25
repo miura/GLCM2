@@ -14,6 +14,7 @@ package emblcmci.glcm;
 //	 		- added several constructors 
 //	 		- calcGLCM(ImagePlus imp) calculate GLCM
 //	 		- added access to Texture parameters by getResultsArray()
+//			- offsetX and offsetY calculated by trigonometry
 //	 		- added "reset Results table" check box in the dialog, in method showDialog()
 //	 		- for use from scripting languages, see example below.
 //
