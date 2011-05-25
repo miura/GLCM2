@@ -61,7 +61,7 @@ public class GLCM_TextureToo implements PlugInFilter {
 	}
 
 	public void run(ImageProcessor ip) {
-		gl.calcGLMC(ip);
+		gl.calcGLCM(ip);
 		gl.writetoResultsTable(true);
 	}
 }

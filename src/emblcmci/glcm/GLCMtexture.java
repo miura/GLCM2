@@ -1,24 +1,67 @@
 package emblcmci.glcm;
-/** GLCM Texture
- * 		GLCM_TextToo.java written by Toby C. Cornish @jhmi.edu was modified for use of the methods as library. 
- * 		see the header of GLCM_TextToo.java for details described in the original code. 
- * 		for use from scripts and other class as stand alone:
- * 			- added several constructors 
- * 			- calcGLMC(ImagePlus imp) calculate GLMC
- * 			- calculated Texture parameters could be extracted using getResultsArray()
- * 			- added "reset Results table" check box in the dialog
- * 			- for use from scripting languages, see example below. 
- */
 
-/* an example javascript 
+// GLCMtexture.java v0.010
+//
+// Kota Miura (miura@embl.de), Toby C. Cornish, Julio E. Cabrera
+// 05/24/2011
+//=================================================================================================
+//  	Modified from GLCM_TextToo.java v0.008 by Toby C. Cornish for use of the class as library. 
+//	 	See documentation by Toby copied from GLCM_TextToo.java.
+//
+//		Following changes were made:
+//			- actual processing and math parts were moved from GLCM_TextToo.java to this code.
+//			-  
+//	 		- added several constructors 
+//	 		- calcGLCM(ImagePlus imp) calculate GLCM
+//	 		- added access to Texture parameters by getResultsArray()
+//	 		- added "reset Results table" check box in the dialog, in method showDialog()
+//	 		- for use from scripting languages, see example below.
+//
+//		example javascript
+//			importClass(Packages.emblcmci.glcm.GLCMtexture);
+//			g = new GLCMtexture(IJ.getImage(), 2, 45, true, true);
+//			glcm = g.calcGLCM();
+//			ht = g.getResultsArray(g);
+//			IJ.log(ht.get("Contrast"));
+//
+//=================================================================================================
+//GLCM_Texture_Too, v. 0.008
+//Toby C. Cornish, tcornis3@jhmi.edu (or toby@tobycornish.com)
+//11/26/2007
+//modified from GLCM_Texture (Gray Level Correlation Matrix Texture Analyzer) v0.4, Author: Julio E. Cabrera, 06/10/05
+//
+//CHANGELOG:
+//------------------------------------------------------------------------------------------------
+//11/26/07 GLCM_TextureToo v0.008 - minor fixes; added references section -- tc
+//11/22/07 GLCM_TextureToo v0.007 - minor fixes to parameters -- tc
+//                              - moved mean and stdev calculations to common area -- tc
+//11/20/07 GLCM_TextureToo v0.006 - confirmed results against parker and Xite -- tc
+//                              - added preliminary shade, prominence, variance, homogeneity, inertia
+//                              - differentiated Haralick correlation from Walker correlation
+//11/19/07 GLCM_TextureToo v0.005 - changed method of calculating correlation -- tc
+//                              - should be closest in nomenclature to Walker, et al.  1995
+//11/19/07 GLCM_TextureToo v0.004 - corrected column name of idm -- tc
+//11/13/07 GLCM_TextureToo v0.003 - changed from roi.contains() to byte[] checking -> much faster -- tc
+//11/13/07 GLCM_TextureToo v0.002 - added progress bar --tc
+//11/11/07 GLCM_TextureToo v0.001 - inherited portions of the codebase from GLCM_Texture 0.4 -- tc
+//                              - fundamental rewrite of GLCM calculation
+//                              - added irregular ROI support
+//                              - added symmetrical/non-symmetrical GLCM calculations
+//                              - corrected directionality (phi) to be 0,45,90,135
+//
+//=================================================================================================
+//
+//References: 
+//R.M. Haralick, Texture feature for image classification, IEEE Trans. SMC 3 (1973) (1), pp. 610–621.
+//Conners, R.W., Trivedi, M.M., and Harlow, C.A., Segmentation of a High-Resolution Urban Scene
+//  Using Texture Operators, CVGIP(25), No. 3, March, 1984, pp. 273-310.
+//Walker, RF, Jackway, P and Longstaff, ID (1995) Improving Co-occurrence Matrix Feature Discrimination.'
+//  In  DICTA '95, 3rd Conference on Digital Image Computing: Techniques and Application, 6 - 8 December,
+//  1995, pages 643-648.
+//Parker, JR, Algorithms for Image Processing and Computer Vision, John Wiley & Sons, 1997.
+//Image processing lab, Department of Informatics, University of Oslo. Xite v1.35: glcmParameter.c, v1.30
+//  2004/05/05 07:34:19 (2004)
 
-importClass(Packages.emblcmci.glmc.GLMCtexture);
-g = new GLMCtexture(IJ.getImage(), 2, 45, true, true);
-glmc = g.calcGLMC();
-ht = g.getResultsArray(g);
-IJ.log(ht.get("Contrast"));
-
- */
 
 import java.awt.Rectangle;
 import java.util.HashMap;
@@ -56,18 +99,18 @@ public class GLCMtexture {
 	double stdevx=0.0;
 	double stdevy=0.0;
 
-	public double Asm;
-	public double Idm;
-	public double Contrast;
-	public double Energy;
-	public double Entropy;
-	public double Homogeneity;
-	public double Variance;
-	public double Shade;
-	public double Prominence;
-	public double Inertia;
-	public double Correlation;
-	public double GLCMsum;
+	double Asm;
+	double Idm;
+	double Contrast;
+	double Energy;
+	double Entropy;
+	double Homogeneity;
+	double Variance;
+	double Shade;
+	double Prominence;
+	double Inertia;
+	double Correlation;
+	double GLCMsum;
 
 	ImagePlus imp;
 
@@ -131,7 +174,7 @@ public class GLCMtexture {
 		this.glcm = glcm; 
 	}
 
-	public void doBasicStats(){
+	void doBasicStats(){
 		double [] px = new double [256];
 		double [] py = new double [256];
 		meanx=0.0;
@@ -384,7 +427,7 @@ if (doMoments == true){
 	}
 	//=========================================================================================
 
-	public void setFieldParameters(){
+	void setFieldParameters(){
 		this.Asm = getAngular2ndMoment();
 		this.Idm = getIDM();
 		this.Contrast = getContrast();
@@ -443,21 +486,21 @@ if (doMoments == true){
 		return true;
 	}
 
-	public double [][] calcGLMC(){
+	public double [][] calcGLCM(){
 		if (imp == null)
 			imp = IJ.getImage();
-		return calcGLMC(imp);
+		return calcGLCM(imp);
 	}
 
-	public double [][] calcGLMC(ImagePlus imp){
-		return calcGLMC(imp.getProcessor());
+	public double [][] calcGLCM(ImagePlus imp){
+		return calcGLCM(imp.getProcessor());
 	}
 
-	/**main part that does the calculation of GLMC
+	/**main part that does the calculation of GLCM
 	 * 
 	 * @param ip
 	 */
-	public double [][] calcGLMC(ImageProcessor ip){
+	public double [][] calcGLCM(ImageProcessor ip){
 		// use the bounding rectangle ROI to roughly limit processing
 		Rectangle roi = ip.getRoi();
 
