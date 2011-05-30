@@ -22,7 +22,7 @@ package emblcmci.glcm;
 //			importClass(Packages.emblcmci.glcm.GLCMtexture);
 //			g = new GLCMtexture(IJ.getImage(), 2, 45, true, true);
 //			glcm = g.calcGLCM();
-//			ht = g.getResultsArray(g);
+//			ht = g.getResultsArray();
 //			IJ.log(ht.get("Contrast"));
 //
 //=================================================================================================
@@ -62,6 +62,8 @@ package emblcmci.glcm;
 //Parker, JR, Algorithms for Image Processing and Computer Vision, John Wiley & Sons, 1997.
 //Image processing lab, Department of Informatics, University of Oslo. Xite v1.35: glcmParameter.c, v1.30
 //  2004/05/05 07:34:19 (2004)
+//
+//Bankman, IN, Ed., Handbook of Medical Image Processing and Analysis, 2nd Edition, 2009. Academic Press  
 
 
 import java.awt.Rectangle;
@@ -243,12 +245,9 @@ if (doMoments == true){
 	rt.setValue("Angular Second Moment", row, asm);
 }
 	 */	
-	//===============================================================================================
-	// calculate the inverse difference moment (idm) (Walker, et al. 1995)
-	// this is calculated using the same formula as Conners, et al., 1984 "Local Homogeneity"
-
 	//=====================================================================================================
 	// calculate the angular second moment (asm)
+	// also known as 'energy' (formula 15.38, Bankman, 2009)
 
 	public double getAngular2ndMoment(){
 		double asm = 0.0;
@@ -259,7 +258,11 @@ if (doMoments == true){
 		}
 		return asm;
 	}
-
+	//===============================================================================================
+	// calculate the inverse difference moment (idm) (Walker, et al. 1995)
+	// this is calculated using the same formula as Conners, et al., 1984 "Local Homogeneity"
+	// (formula 15.40, Bankman, 2009)
+	
 	public double getIDM(){
 		double IDM = 0.0;
 		for (int i=0;  i<256; i++)  {
@@ -269,21 +272,24 @@ if (doMoments == true){
 		}
 		return IDM;
 	}
-	//=====================================================================================================
-	// calculate the angular second moment (asm)
 
+	//===============================================================================================
+	// (formula 15.39, Bankman, 2009) energy weighted by pixel value difference
 	public double getContrast(){
 		double contrast=0.0;
 
 		for (int i=0;  i<256; i++)  {
 			for (int j=0; j<256; j++) {
-				contrast += Math.pow(Math.abs(i-j),2)*(glcm[i][j]);
+				//contrast += Math.pow(Math.abs(i-j),2)*(glcm[i][j]);
+				contrast += Math.pow(i-j,2)*(glcm[i][j]); // 20110530				
 			}
 		}
 		return contrast;
 	}
 	//===============================================================================================
-	// calculate the energy	
+	// calculate the energy
+	// - same as Angular 2nd Moment (see above), so may be delete this. 
+	// - TODO (in calgary website, ASM is square rooted to give energy)
 	public double getEnergy(){
 		double energy = 0.0;
 		for (int i=0;  i<256; i++)  {
@@ -295,6 +301,7 @@ if (doMoments == true){
 	}
 	//===============================================================================================
 	// calculate the entropy (Haralick et al., 1973; Walker, et al., 1995)
+	// -TODO there are some difference in textbooks as well. 
 	public double getEntropy(){
 		double entropy = 0.0;
 		for (int i=0;  i<256; i++)  {
@@ -313,7 +320,8 @@ if (doMoments == true){
 	// calculate the homogeneity (Parker)
 	// "Local Homogeneity" from Conners, et al., 1984 is calculated the same as IDM above
 	// Parker's implementation is below; absolute value of i-j is taken rather than square
-
+	// - matlab textbook also uses non-squred absolute difference |i-j|
+	// -- using absolute value, flat image (diagonal) will be 1. 
 	public double getHomogeneity(){
 		double homogeneity = 0.0;
 		for (int i=0;  i<256; i++) {
