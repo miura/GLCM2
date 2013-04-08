@@ -1,3 +1,8 @@
-.classpath
+*.classpath
+*.project
+.settings/*
 target/classes/*
 target/maven-archiver/*
+*.DS_Store
+.pydevproject
+.externalToolBuilders/*
