@@ -28,7 +28,7 @@ package emblcmci.glcm;
 //=================================================================================================
 //
 // References: 
-//   R.M. Haralick, Texture feature for image classification, IEEE Trans. SMC 3 (1973) (1), pp. 610–621.
+//   R.M. Haralick, Texture feature for image classification, IEEE Trans. SMC 3 (1973) (1), pp. 610-621.
 //   Conners, R.W., Trivedi, M.M., and Harlow, C.A., Segmentation of a High-Resolution Urban Scene
 //     Using Texture Operators, CVGIP(25), No. 3, March, 1984, pp. 273-310.
 //   Walker, RF, Jackway, P and Longstaff, ID (1995) Improving Co-occurrence Matrix Feature Discrimination.'
